@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import DatePicker from "../components/DatePicker";
 import RoomsList from "../components/RoomsList";
 import { calculateNights } from "../utils/dateUtils";
@@ -9,6 +9,7 @@ export default function HomePage() {
   const [checkIn, setCheckIn] = useState(null);
   const [checkOut, setCheckOut] = useState(null);
   const [guests, setGuests] = useState(null);
+
   const [rooms, setRooms] = useState([]);
   const [roomsLoading, setRoomsLoading] = useState(false);
 
@@ -20,70 +21,82 @@ export default function HomePage() {
     if (!checkIn || !checkOut || !guests) {
       setRooms([]);
       setRoomsLoading(false);
-      return;
+      return () => {
+        cancelled = true;
+      };
     }
 
     const ci = toYMD(checkIn);
     const co = toYMD(checkOut);
 
-    setRoomsLoading(true);
+    const preloadImage = (url) =>
+      new Promise((resolve) => {
+        if (!url) return resolve();
+        const img = new Image();
+        img.onload = resolve;
+        img.onerror = resolve;
+        img.src = url;
+      });
 
-    fetch(
-      `${API_URL}/available-rooms?checkIn=${ci}&checkOut=${co}&guests=${guests}`
-    )
-      .then((res) => res.json())
-      .then(async (data) => {
-        // ❗ держим roomsLoading=true пока не догрузятся картинки
-        const preload = (url) =>
-          new Promise((resolve) => {
-            const img = new Image();
-            img.onload = resolve;
-            img.onerror = resolve; // чтобы не зависнуть на битой картинке
-            img.src = url;
-          });
+    const loadRooms = async () => {
+      try {
+        setRoomsLoading(true);
 
-        await Promise.all(data.map((r) => preload(r.imageUrl)));
+        const res = await fetch(
+          `${API_URL}/available-rooms?checkIn=${ci}&checkOut=${co}&guests=${guests}`
+        );
+
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+
+        const data = await res.json();
+        const list = Array.isArray(data) ? data : [];
+
+        // Trzymamy loader, dopóki nie dograją się obrazy
+        await Promise.all(list.map((r) => preloadImage(r.imageUrl)));
 
         if (!cancelled) {
-          setRooms(data);
+          setRooms(list);
         }
-      })
-      .catch((err) => console.error("Failed to load rooms:", err))
-      .finally(() => {
+      } catch (err) {
+        console.error("Nie udało się pobrać pokoi:", err);
+        if (!cancelled) setRooms([]);
+      } finally {
         if (!cancelled) setRoomsLoading(false);
-      });
+      }
+    };
+
+    loadRooms();
 
     return () => {
       cancelled = true;
     };
   }, [checkIn, checkOut, guests]);
 
-  // Обрабатываем изменение дат из DatePicker
-  const handleDatesChange = ({ checkIn: ci, checkOut: co }) => {
-    setCheckIn(ci);
+  const handleDatesChange = ({ checkIn: nextCheckIn, checkOut: nextCheckOut }) => {
+    setCheckIn(nextCheckIn);
 
-    // Если дата выезда стала невалидной — сбрасываем её
-    if (ci && co && co.getTime() <= ci.getTime()) {
+    if (
+      nextCheckIn &&
+      nextCheckOut &&
+      nextCheckOut.getTime() <= nextCheckIn.getTime()
+    ) {
       setCheckOut(null);
       return;
     }
 
-    setCheckOut(co);
+    setCheckOut(nextCheckOut);
   };
 
-  // Проверка некорректного диапазона
   const isInvalidRange =
     checkIn && checkOut && checkOut.getTime() <= checkIn.getTime();
 
-  // Флаг: можно ли показывать список номеров
-  const canShowRooms = Boolean(
-    checkIn && checkOut && guests && !isInvalidRange
-  );
-
   return (
-    <div className=" main">
+    <div className="main">
       <section className="content">
-        <h2>Your seaside escape starts here</h2>
+        <h2>Twój nadmorski wypoczynek zaczyna się tutaj</h2>
+
         <DatePicker
           checkIn={checkIn}
           checkOut={checkOut}
@@ -92,27 +105,24 @@ export default function HomePage() {
           onGuestsChange={setGuests}
         />
 
-        {/* Отображение выбранных дат */}
         <div className="mt-3">
-          Selected dates: {checkIn ? checkIn.toLocaleDateString("en-GB") : "—"}{" "}
-          → {checkOut ? checkOut.toLocaleDateString("en-GB") : "—"}
+          Wybrane daty:{" "}
+          {checkIn ? checkIn.toLocaleDateString("pl-PL") : "—"} →{" "}
+          {checkOut ? checkOut.toLocaleDateString("pl-PL") : "—"}
         </div>
       </section>
 
-      {/* Условный рендер */}
-      {/* Условный рендер */}
       {!checkIn || !checkOut ? (
         <div className="alert alert-info mt-4 mb-0">
-          Please select both <b>check-in</b> and <b>check-out</b> dates to view
-          available rooms.
+          Wybierz daty <b>zameldowania</b> i <b>wymeldowania</b>, aby zobaczyć dostępne pokoje.
         </div>
       ) : !guests ? (
         <div className="alert alert-info mt-4 mb-0">
-          Please select number of <b>guests</b>.
+          Wybierz liczbę <b>gości</b>.
         </div>
       ) : isInvalidRange ? (
         <div className="alert alert-danger mt-4 mb-0">
-          Check-out date must be after check-in date.
+          Data wymeldowania musi być późniejsza niż data zameldowania.
         </div>
       ) : (
         <RoomsList
@@ -123,6 +133,7 @@ export default function HomePage() {
           guests={guests}
         />
       )}
+
       {roomsLoading && (
         <div className="availability-overlay">
           <div className="spinner" />

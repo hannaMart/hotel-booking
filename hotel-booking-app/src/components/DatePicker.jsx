@@ -11,52 +11,47 @@ export default function DatePicker({
   const isInvalidRange =
     checkIn && checkOut && checkOut.getTime() <= checkIn.getTime();
 
-  // Ограничения по датам: сегодня .. +6 месяцев
   const today = new Date();
   const minDate = new Date(
     today.getFullYear(),
     today.getMonth(),
     today.getDate()
-  ); // обрезали время
+  );
   const maxDate = new Date(minDate);
   maxDate.setMonth(maxDate.getMonth() + 6);
 
-  // Для check-out: минимум = max(сегодня, checkIn)
   const checkOutMinDate = checkIn && checkIn > minDate ? checkIn : minDate;
 
   return (
     <div className="form-wrapper card mt-4">
       <div className="card-body">
-        <div className="flex-container-select-block row g-3">
-          {/* Check-in */}
+        <div className=" jcsb row g-3">
           <div className="col-md-4">
             <ReactDatePicker
               selected={checkIn}
               onChange={(date) => onChange({ checkIn: date, checkOut })}
               dateFormat="dd-MM-yyyy"
               className="form-control"
-              placeholderText="Check-in date"
+              placeholderText="Zameldowanie"
               minDate={minDate}
               maxDate={maxDate}
             />
           </div>
 
-          {/* Check-out */}
           <div className="col-md-4">
             <ReactDatePicker
               selected={checkOut}
               onChange={(date) => onChange({ checkIn, checkOut: date })}
               dateFormat="dd-MM-yyyy"
               className="form-control"
-              placeholderText="Check-out date"
+              placeholderText="Wymeldowanie"
               minDate={checkOutMinDate}
               maxDate={maxDate}
               disabled={!checkIn}
             />
           </div>
 
-          {/* Guests */}
-          <div className="guests-select col-md-2">
+          <div className="col-md-2">
             <select
               id="guests"
               name="guests"
@@ -70,7 +65,7 @@ export default function DatePicker({
               required
             >
               <option value="" disabled>
-                Guests
+                Goście
               </option>
               {[1, 2, 3, 4, 5, 6].map((n) => (
                 <option key={n} value={n}>
@@ -83,7 +78,7 @@ export default function DatePicker({
 
         {isInvalidRange && (
           <div className="text-danger mt-2">
-            Check-out must be after check-in
+            Data wymeldowania musi być późniejsza niż data zameldowania.
           </div>
         )}
       </div>

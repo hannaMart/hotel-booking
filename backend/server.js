@@ -7,13 +7,34 @@ const { sendBookingConfirmationEmail } = require("./mailer");
 
 const app = express();
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+];
+
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:5174"],
+    origin: (origin, cb) => {
+      // Zapytania bez origin (np. Render healthcheck, curl) – pozwalamy
+      if (!origin) return cb(null, true);
+
+      // Lokalny frontend (Vite)
+      if (allowedOrigins.includes(origin)) return cb(null, true);
+
+      // Tymczasowo: pozwalamy na domeny https (np. Vercel)
+      if (origin.startsWith("https://")) return cb(null, true);
+
+      // Inne źródła blokujemy
+      return cb(new Error("Not allowed by CORS"));
+    },
     credentials: true,
   })
 );
+
+
 app.use(express.json());
+
+app.get("/health", (req, res) => res.json({ ok: true }));
 
 console.log("SESSION_SECRET:", !!process.env.SESSION_SECRET);
 console.log("ADMIN_PASSWORD:", !!process.env.ADMIN_PASSWORD);

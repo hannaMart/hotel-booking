@@ -2,14 +2,20 @@
   --busy: #d9534f;
   --free: #5cb85c;
   width: 100%;
-  margin: 0; /* было 20px auto */
+  margin: 0;
+}
+
+html,
+body {
+  height: 100%;
 }
 
 body {
-  margin: 0; /* было 0 auto */
-  max-width: none; /* было 1920px */
+  margin: 0;
+  max-width: none;
   width: 100%;
-  padding: 0; /* если хочешь отступы — делай их в .container */
+  padding: 0;
+  font-size: 15px;
 }
 
 a {
@@ -57,6 +63,28 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+#root {
+  min-height: 100vh;
+  background-image: url("https://oboi247.ru/img/post/27/0.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+#root.no-bg {
+  background: #f5f7f8;
+}
+
+.form-select {
+  width: auto !important;
+}
+
+.guests-select {
+  width: auto !important;
+}
+
 .availability-overlay {
   position: fixed;
   inset: 0;
@@ -120,7 +148,6 @@ button:focus-visible {
   display: inline-block;
 }
 
-/* legend dots */
 .legend-busy {
   background-color: var(--busy);
 }
@@ -129,7 +156,6 @@ button:focus-visible {
   background-color: var(--free);
 }
 
-/* FullCalendar: day background */
 .day-free .fc-daygrid-day-frame {
   background-color: rgba(92, 184, 92, 0.18);
 }
@@ -148,35 +174,12 @@ button:focus-visible {
   display: inline-block;
   margin-right: 20px;
 }
+
 .header {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 12px 20px;
-}
-html,
-body {
-  height: 100%;
-}
-
-body {
-  margin: 0;
-  font-size: 15px;
-}
-
-/* фон по умолчанию (на всём приложении) */
-#root {
-  min-height: 100vh;
-  background-image: url("https://oboi247.ru/img/post/27/0.jpg");
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-}
-
-/* админка отключает фон */
-#root.no-bg {
-  background: #f5f7f8;
 }
 
 .content {
@@ -189,31 +192,31 @@ body {
   flex-direction: column;
   align-items: center;
 }
+
 .form-wrapper {
-  max-width: 550px;
+  max-width: 650px;
   padding: 20px !important;
 }
 
-.guests-select {
-  width: auto !important;
-}
-.flex-container-select-block {
+.jcsb {
   justify-content: space-between;
+  padding-right: 20px;
 }
+
 .main {
-  min-height: calc(100vh - 72px); /* высота header */
+  min-height: calc(100vh - 72px);
   display: flex;
-  align-items: center; /* вертикально */
-  justify-content: center; /* горизонтально */
+  align-items: center;
+  justify-content: center;
   padding: 24px 16px;
   flex-direction: column;
 }
-.booking-page {
-  h2 {
-    color: white;
-    text-align: center;
-  }
-  img {
-    height: auto !important;
-  }
+
+.booking-page h2 {
+  color: white;
+  text-align: center;
+}
+
+.booking-page img {
+  height: auto !important;
 }

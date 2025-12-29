@@ -6,6 +6,7 @@ import { API_URL } from "../config";
 export default function BookingPage() {
   const { state } = useLocation();
   const navigate = useNavigate();
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -16,10 +17,10 @@ export default function BookingPage() {
     return (
       <div className="container py-4">
         <div className="alert alert-warning">
-          Booking data is missing. Please start from the home page.
+          Brakuje danych rezerwacji. Wróć na stronę główną i wybierz termin oraz pokój.
         </div>
         <button className="btn btn-primary" onClick={() => navigate("/")}>
-          Back to Home
+          Wróć na stronę główną
         </button>
       </div>
     );
@@ -28,10 +29,10 @@ export default function BookingPage() {
   const { room, checkIn, checkOut, guests, nights, total } = state;
 
   const formattedDates = useMemo(() => {
-    const fmt = (d) => new Date(d).toLocaleDateString("en-GB");
+    const formatDate = (d) => new Date(d).toLocaleDateString("pl-PL");
     return {
-      checkIn: fmt(checkIn),
-      checkOut: fmt(checkOut),
+      checkIn: formatDate(checkIn),
+      checkOut: formatDate(checkOut),
     };
   }, [checkIn, checkOut]);
 
@@ -39,11 +40,11 @@ export default function BookingPage() {
     if (loading) return;
 
     setError("");
-    let navigating = false;
+    let navigatingAway = false;
 
-    // вторая линия защиты (browser required тоже сработает)
+    // Druga linia ochrony (required w przeglądarce też zadziała)
     if (!guestName.trim() || !guestEmail.trim()) {
-      setError("Please enter your full name and email.");
+      setError("Wpisz imię i nazwisko oraz adres e-mail.");
       return;
     }
 
@@ -64,35 +65,34 @@ export default function BookingPage() {
       });
 
       if (res.status === 409) {
-        setError("Sorry — this room has just been booked for these dates.");
+        setError("Ten pokój został właśnie zarezerwowany na wybrany termin.");
         return;
       }
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        setError(err.message || "Booking failed");
+        setError(err.message || "Nie udało się utworzyć rezerwacji.");
         return;
       }
 
       const booking = await res.json();
 
-      navigating = true; // <-- ключ
+      navigatingAway = true;
       navigate(`/confirmation/${booking.bookingId}`, { replace: true });
-    } catch (e) {
-      setError("Network error");
+    } catch {
+      setError("Błąd sieci. Spróbuj ponownie.");
     } finally {
-      // <-- НЕ выключаем loading, если уходим со страницы
-      if (!navigating) setLoading(false);
+      // Nie wyłączamy loading, jeśli odchodzimy ze strony
+      if (!navigatingAway) setLoading(false);
     }
   };
 
   return (
-    <div className=" booking-page container py-4">
-      <h2 className="mb-3">Confirm your booking</h2>
+    <div className="booking-page container py-4">
+      <h2 className="mb-3">Potwierdź rezerwację</h2>
       {error && <div className="alert alert-danger">{error}</div>}
 
       <div className="row g-4">
-        {/* LEFT: Room */}
         <div className="col-md-6">
           <div className="card h-100">
             <img
@@ -107,15 +107,14 @@ export default function BookingPage() {
               <div className="text-muted small mb-2">{room.bedType}</div>
 
               <ul className="small mb-0">
-                {room.features.map((f) => (
-                  <li key={f}>{f}</li>
+                {room.features.map((feature) => (
+                  <li key={feature}>{feature}</li>
                 ))}
               </ul>
             </div>
           </div>
         </div>
 
-        {/* RIGHT: Summary */}
         <div className="col-md-6">
           <div className="card h-100 position-relative">
             {loading && (
@@ -131,51 +130,51 @@ export default function BookingPage() {
               }}
             >
               <div className="card-body d-flex flex-column">
-                <h5 className="card-title">Booking summary</h5>
+                <h5 className="card-title">Podsumowanie</h5>
 
                 <div className="mb-2">
-                  <div className="text-muted small">Dates</div>
+                  <div className="text-muted small">Termin</div>
                   <div>
                     {formattedDates.checkIn} → {formattedDates.checkOut}
                   </div>
                 </div>
 
                 <div className="mb-2">
-                  <div className="text-muted small">Guests</div>
+                  <div className="text-muted small">Liczba gości</div>
                   <div>{guests}</div>
                 </div>
 
                 <div className="mb-2">
-                  <div className="text-muted small">Nights</div>
+                  <div className="text-muted small">Liczba nocy</div>
                   <div>{nights}</div>
                 </div>
 
                 <div className="mb-2">
-                  <div className="text-muted small">Price per night</div>
+                  <div className="text-muted small">Cena za noc</div>
                   <div>{room.pricePerNight} PLN</div>
                 </div>
 
                 <hr />
 
                 <div className="d-flex justify-content-between align-items-center mb-3">
-                  <div className="fw-bold">Total</div>
+                  <div className="fw-bold">Suma</div>
                   <div className="fw-bold">{total} PLN</div>
                 </div>
 
                 <div className="mb-3">
-                  <label className="form-label">Full name</label>
+                  <label className="form-label">Imię i nazwisko</label>
                   <input
                     className="form-control"
                     value={guestName}
                     onChange={(e) => setGuestName(e.target.value)}
-                    placeholder="e.g. Anna Martysiuk"
+                    placeholder="np. Anna Martysiuk"
                     required
                     disabled={loading}
                   />
                 </div>
 
                 <div className="mb-3">
-                  <label className="form-label">Email</label>
+                  <label className="form-label">E-mail</label>
                   <input
                     type="email"
                     className="form-control"
@@ -187,14 +186,13 @@ export default function BookingPage() {
                   />
                 </div>
 
-                {/* Buttons pinned to bottom */}
                 <div className="mt-auto">
                   <button
                     className="btn btn-success w-100"
                     disabled={loading}
                     type="submit"
                   >
-                    Confirm booking
+                    Potwierdź rezerwację
                   </button>
 
                   <button
@@ -203,7 +201,7 @@ export default function BookingPage() {
                     disabled={loading}
                     type="button"
                   >
-                    Back
+                    Wróć
                   </button>
                 </div>
               </div>

@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
+
 import { API_URL } from "../config";
 import { toYMD } from "../utils/dateYMD";
 import { calculateNights } from "../utils/dateUtils";
@@ -15,16 +16,19 @@ export default function CalendarPage() {
   const [bookings, setBookings] = useState([]);
   const [guests, setGuests] = useState(1);
 
-  // выбранный диапазон: [ci, co) (co всегда > ci)
+  // wybrany zakres: [ci, co) (co zawsze > ci)
   const [range, setRange] = useState({ ci: null, co: null });
-
-  /* -------------------- LOAD -------------------- */
 
   useEffect(() => {
     loadRooms();
     loadBookings();
-    document.getElementById("root")?.classList.add("no-bg");
-    return () => document.getElementById("root")?.classList.remove("no-bg");
+
+    const rootElement = document.getElementById("root");
+    rootElement?.classList.add("no-bg");
+
+    return () => {
+      rootElement?.classList.remove("no-bg");
+    };
   }, []);
 
   async function loadRooms() {
@@ -32,8 +36,8 @@ export default function CalendarPage() {
       const res = await fetch(`${API_URL}/rooms`);
       const data = await res.json();
       setRooms(Array.isArray(data) ? data : []);
-    } catch (e) {
-      console.error("LOAD ROOMS ERROR:", e?.message || e);
+    } catch (err) {
+      console.error("Nie udało się wczytać pokoi:", err);
       setRooms([]);
     }
   }
@@ -45,51 +49,50 @@ export default function CalendarPage() {
       });
       const data = await res.json();
       setBookings(Array.isArray(data) ? data : []);
-    } catch (e) {
-      console.error("LOAD BOOKINGS ERROR:", e?.message || e);
+    } catch (err) {
+      console.error("Nie udało się wczytać rezerwacji:", err);
       setBookings([]);
     }
   }
 
-  /* -------------------- DERIVED -------------------- */
+  const suitableRooms = useMemo(
+    () => rooms.filter((room) => Number(room.capacity) >= guests),
+    [rooms, guests]
+  );
 
-  const suitableRooms = useMemo(() => {
-    return rooms.filter((r) => Number(r.capacity) >= guests);
-  }, [rooms, guests]);
-
-  // fallback: если booking не содержит roomId, пробуем сопоставить по title
   const roomIdByTitle = useMemo(() => {
     const map = new Map();
-    for (const r of rooms) map.set(r.title, r.id);
+    for (const room of rooms) map.set(room.title, room.id);
     return map;
   }, [rooms]);
 
-  function getBookingRoomId(b) {
-    if (b.roomId) return b.roomId;
-    if (b.room_id) return b.room_id;
-    if (b.roomTitle) return roomIdByTitle.get(b.roomTitle) || null;
-    return null;
-  }
+  const getBookingRoomId = useCallback(
+    (booking) => {
+      if (booking.roomId) return booking.roomId;
+      if (booking.room_id) return booking.room_id;
+      if (booking.roomTitle) return roomIdByTitle.get(booking.roomTitle) || null;
+      return null;
+    },
+    [roomIdByTitle]
+  );
 
-  function rangesOverlap(ci, co, bi, bo) {
-    // пересечение [ci,co) и [bi,bo)
-    return ci < bo && co > bi;
-  }
+  const rangesOverlap = (ci, co, bi, bo) => ci < bo && co > bi;
 
   const roomIsFreeForRange = useCallback(
     (roomId, ci, co) => {
-      for (const b of bookings) {
-        if (b.status !== "confirmed") continue;
+      for (const booking of bookings) {
+        if (booking.status !== "confirmed") continue;
 
-        const bRoomId = getBookingRoomId(b);
-        if (!bRoomId) continue;
-        if (bRoomId !== roomId) continue;
+        const bookingRoomId = getBookingRoomId(booking);
+        if (!bookingRoomId || bookingRoomId !== roomId) continue;
 
-        if (rangesOverlap(ci, co, b.checkIn, b.checkOut)) return false;
+        if (rangesOverlap(ci, co, booking.checkIn, booking.checkOut)) {
+          return false;
+        }
       }
       return true;
     },
-    [bookings, roomIdByTitle]
+    [bookings, getBookingRoomId]
   );
 
   const freeRoomsForSelectedRange = useMemo(() => {
@@ -99,52 +102,45 @@ export default function CalendarPage() {
     );
   }, [suitableRooms, range, roomIsFreeForRange]);
 
-  // nights & total for selected range (use your shared util)
   const nights =
     range.ci && range.co
       ? calculateNights(
-          new Date(range.ci + "T00:00:00"),
-          new Date(range.co + "T00:00:00")
+          new Date(`${range.ci}T00:00:00`),
+          new Date(`${range.co}T00:00:00`)
         )
       : 0;
 
-  /* -------------------- CALENDAR INPUT -------------------- */
-
-  // click on a day => 1 night (end > start always)
-  function handleDateClick(info) {
+  const handleDateClick = (info) => {
     const ci = toYMD(info.date);
     const co = toYMD(new Date(info.date.getTime() + 86400000));
     setRange({ ci, co });
-  }
+  };
 
-  // drag select => [start, end) (end exclusive, so end > start)
-  function handleSelect(info) {
+  const handleSelect = (info) => {
     const ci = toYMD(info.start);
     const co = toYMD(info.end);
     if (co <= ci) return;
     setRange({ ci, co });
-  }
-
-  /* -------------------- RENDER -------------------- */
+  };
 
   return (
     <div className="no-bg calendar-page">
-      <h1 className="calendar-title">Availability calendar</h1>
+      <h1 className="calendar-title">Kalendarz dostępności</h1>
 
       <div className="availability-legend">
         <div className="legend-item">
           <span className="legend-dot legend-busy" />
-          Busy (no rooms for selected guests)
+          Zajęte (brak wolnych pokoi dla wybranej liczby gości)
         </div>
         <div className="legend-item">
           <span className="legend-dot legend-free" />
-          Free (at least 1 room available)
+          Wolne (co najmniej 1 pokój dostępny)
         </div>
       </div>
 
       <div className="availability-filters">
         <label className="filters-label" htmlFor="guests">
-          Guests:
+          Goście:
         </label>
 
         <select
@@ -161,11 +157,11 @@ export default function CalendarPage() {
         </select>
 
         <div className="range-chip">
-          Check-in: <strong>{range.ci ?? "—"}</strong> &nbsp;|&nbsp; Check-out:{" "}
-          <strong>{range.co ?? "—"}</strong>
+          Zameldowanie: <strong>{range.ci ?? "—"}</strong> &nbsp;|&nbsp;
+          Wymeldowanie: <strong>{range.co ?? "—"}</strong>
           {range.ci && range.co ? (
             <>
-              &nbsp;|&nbsp; Nights: <strong>{nights}</strong>
+              &nbsp;|&nbsp; Nocy: <strong>{nights}</strong>
             </>
           ) : null}
         </div>
@@ -176,16 +172,16 @@ export default function CalendarPage() {
           onClick={() => setRange({ ci: null, co: null })}
           disabled={!range.ci && !range.co}
         >
-          Clear selection
+          Wyczyść wybór
         </button>
       </div>
 
       <FullCalendar
         plugins={[dayGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
-        selectable={true}
-        selectMirror={true}
-        unselectAuto={true}
+        selectable
+        selectMirror
+        unselectAuto
         longPressDelay={150}
         selectLongPressDelay={150}
         select={handleSelect}
@@ -195,12 +191,11 @@ export default function CalendarPage() {
           center: "title",
           right: "dayGridMonth,dayGridWeek",
         }}
-        // Подсветка по Guests: проверяем доступность на 1 ночь (этот день)
         dayCellClassNames={(arg) => {
           if (!rooms.length) return [];
 
           const ci = toYMD(arg.date);
-          const co = toYMD(new Date(arg.date.getTime() + 86400000)); // +1 night
+          const co = toYMD(new Date(arg.date.getTime() + 86400000));
 
           const freeCount = suitableRooms.filter((room) =>
             roomIsFreeForRange(room.id, ci, co)
@@ -214,13 +209,13 @@ export default function CalendarPage() {
       {range.ci && range.co && (
         <div className="available-rooms">
           <div className="available-rooms-title">
-            Available rooms for <strong>{range.ci}</strong> →{" "}
-            <strong>{range.co}</strong> (guests={guests}):{" "}
+            Dostępne pokoje dla <strong>{range.ci}</strong> →{" "}
+            <strong>{range.co}</strong> (goście={guests}):{" "}
             <strong>{freeRoomsForSelectedRange.length}</strong>
           </div>
 
           {freeRoomsForSelectedRange.length === 0 ? (
-            <div className="available-rooms-empty">No rooms available.</div>
+            <div className="available-rooms-empty">Brak dostępnych pokoi.</div>
           ) : (
             <ul className="available-rooms-list">
               {freeRoomsForSelectedRange.map((room) => {
@@ -235,18 +230,17 @@ export default function CalendarPage() {
                     </div>
 
                     <div className="available-room-sub">
-                      <div className="available-room-sub">
-                        {room.bedType} • capacity {room.capacity} •{" "}
-                        {pricePerNight} PLN/night
-                      </div>
+                      {room.bedType} • miejsca: {room.capacity} • {pricePerNight}{" "}
+                      PLN / noc
                     </div>
 
                     <div className="available-room-price">
-                      Total: <strong>{total} PLN</strong> ({nights} nights)
+                      Razem: <strong>{total} PLN</strong> ({nights} nocy)
                     </div>
 
                     <button
                       className="available-room-btn"
+                      type="button"
                       onClick={() =>
                         navigate(`/booking/${room.id}`, {
                           state: {
@@ -260,7 +254,7 @@ export default function CalendarPage() {
                         })
                       }
                     >
-                      Book this room
+                      Zarezerwuj ten pokój
                     </button>
                   </li>
                 );

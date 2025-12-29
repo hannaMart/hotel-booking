@@ -2,7 +2,9 @@ import { useNavigate } from "react-router-dom";
 
 export default function RoomCard({ room, nights, checkIn, checkOut, guests }) {
   const navigate = useNavigate();
-  const totalPrice = nights * room.pricePerNight;
+
+  const pricePerNight = Number(room.pricePerNight || 0);
+  const totalPrice = nights * pricePerNight;
 
   const handleBookNow = () => {
     navigate(`/booking/${room.id}`, {
@@ -19,7 +21,6 @@ export default function RoomCard({ room, nights, checkIn, checkOut, guests }) {
 
   return (
     <div className="card h-100">
-      {/* Image */}
       <img
         src={room.imageUrl}
         className="card-img-top"
@@ -28,29 +29,26 @@ export default function RoomCard({ room, nights, checkIn, checkOut, guests }) {
       />
 
       <div className="card-body d-flex flex-column">
-        {/* Title */}
         <h5 className="card-title mb-2">{room.title}</h5>
 
-        {/* Meta */}
         <div className="text-muted small mb-2">{room.bedType}</div>
 
-        {/* Features */}
         <ul className="small mb-3">
           {room.features.map((feature) => (
             <li key={feature}>{feature}</li>
           ))}
         </ul>
 
-        {/* Price */}
         <div className="mt-auto">
           <div className="fw-bold">
-            {room.pricePerNight} PLN{" "}
-            <span className="text-muted small">/ night</span>
+            {pricePerNight} PLN{" "}
+            <span className="text-muted small">/ noc</span>
           </div>
 
           {nights > 0 && (
             <div className="text-muted small mb-2">
-              {totalPrice} PLN total for {nights} night{nights > 1 ? "s" : ""}
+              {totalPrice} PLN łącznie za {nights}{" "}
+              {nights === 1 ? "noc" : "nocy"}
             </div>
           )}
 
@@ -60,7 +58,7 @@ export default function RoomCard({ room, nights, checkIn, checkOut, guests }) {
             onClick={handleBookNow}
             disabled={!checkIn || !checkOut || !guests || nights <= 0}
           >
-            Book now
+            Zarezerwuj
           </button>
         </div>
       </div>

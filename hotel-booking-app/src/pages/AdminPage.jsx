@@ -1,27 +1,37 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { API_URL } from "../config";
 
 export default function AdminPage() {
-  const [bookings, setBookings] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  // фильтр: active | all
+  const [bookings, setBookings] = useState([]);
   const [statusFilter, setStatusFilter] = useState("active");
 
-  // загрузка бронирований (только при первом входе)
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const rootElement = document.getElementById("root");
+    rootElement?.classList.add("no-bg");
+
+    loadBookings();
+
+    return () => {
+      rootElement?.classList.remove("no-bg");
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   async function loadBookings() {
-    setError(null);
+    setError("");
+    setIsLoading(true);
 
     try {
-      const meRes = await fetch(`${API_URL}/admin/me`, {
-        credentials: "include",
-      });
-      const me = await meRes.json();
+      const meRes = await fetch(`${API_URL}/admin/me`, { credentials: "include" });
+      const me = await meRes.json().catch(() => ({}));
 
-      if (!me.isAdmin) {
+      if (!meRes.ok || !me?.isAdmin) {
         navigate("/admin/login");
         return;
       }
@@ -29,117 +39,111 @@ export default function AdminPage() {
       const res = await fetch(`${API_URL}/admin/bookings`, {
         credentials: "include",
       });
-      const data = await res.json();
 
+      const data = await res.json().catch(() => []);
       if (!res.ok) {
-        setError(data?.error || "Failed to load bookings");
+        setError(data?.error || "Nie udało się wczytać rezerwacji.");
         return;
       }
 
-      setBookings(data);
-    } catch {
-      setError("Failed to load bookings");
+      setBookings(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("Nie udało się wczytać rezerwacji:", err);
+      setError("Nie udało się wczytać rezerwacji.");
     } finally {
       setIsLoading(false);
     }
   }
 
-  useEffect(() => {
-    loadBookings();
-    document.getElementById("root")?.classList.add("no-bg");
-    return () => document.getElementById("root")?.classList.remove("no-bg");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  async function updateBookingStatus(bookingId, action, nextStatus, fallbackMessage) {
+    try {
+      const res = await fetch(`${API_URL}/admin/bookings/${bookingId}/${action}`, {
+        method: "PATCH",
+        credentials: "include",
+      });
 
-  // отмена бронирования — обновляем только строку
-  async function cancelBooking(bookingId) {
-    const res = await fetch(`${API_URL}/admin/bookings/${bookingId}/cancel`, {
-      method: "PATCH",
-      credentials: "include",
-    });
+      const data = await res.json().catch(() => ({}));
 
-    const updated = await res.json();
+      if (!res.ok) {
+        alert(data?.error || fallbackMessage);
+        return;
+      }
 
-    if (!res.ok) {
-      alert(updated?.error || "Cancel failed");
-      return;
+      setBookings((prev) =>
+        prev.map((b) => (b.bookingId === bookingId ? { ...b, status: nextStatus } : b))
+      );
+    } catch {
+      alert(fallbackMessage);
     }
+  }
 
-    setBookings((prev) =>
-      prev.map((b) =>
-        b.bookingId === bookingId ? { ...b, status: "cancelled" } : b
-      )
+  function cancelBooking(bookingId) {
+    return updateBookingStatus(
+      bookingId,
+      "cancel",
+      "cancelled",
+      "Nie udało się anulować rezerwacji."
     );
   }
 
-  async function completeBooking(bookingId) {
-    const res = await fetch(`${API_URL}/admin/bookings/${bookingId}/complete`, {
-      method: "PATCH",
-      credentials: "include",
-    });
-
-    const updated = await res.json();
-
-    if (!res.ok) {
-      alert(updated?.error || "Complete failed");
-      return;
-    }
-
-    setBookings((prev) =>
-      prev.map((b) =>
-        b.bookingId === bookingId ? { ...b, status: "completed" } : b
-      )
+  function completeBooking(bookingId) {
+    return updateBookingStatus(
+      bookingId,
+      "complete",
+      "completed",
+      "Nie udało się zakończyć rezerwacji."
     );
   }
 
-  // применяем фильтр
-  const visibleBookings =
-    statusFilter === "active"
-      ? bookings.filter((b) => b.status === "confirmed")
-      : bookings;
+  const visibleBookings = useMemo(() => {
+    if (statusFilter === "active") {
+      return bookings.filter((b) => b.status === "confirmed");
+    }
+    return bookings;
+  }, [bookings, statusFilter]);
 
-  if (isLoading) return <p>Loading…</p>;
+  if (isLoading) return <p>Wczytywanie…</p>;
   if (error) return <p>{error}</p>;
 
   return (
     <div className="main container mt-4">
-      <a
-        href="/admin/calendar"
-        style={{ display: "inline-block", marginBottom: 12 }}
-      >
-        Open availability calendar
-      </a>
+      <Link to="/admin/calendar" style={{ display: "inline-block", marginBottom: 12 }}>
+        Otwórz kalendarz dostępności
+      </Link>
 
-      <h2>Admin — Bookings</h2>
+      <h2>Panel admina — rezerwacje</h2>
 
-      {/* фильтр */}
-      <div className="mb-3">
+      <div className="mb-3 d-flex gap-2">
         <button
+          type="button"
+          className="btn btn-sm btn-outline-primary"
           onClick={() => setStatusFilter("active")}
           disabled={statusFilter === "active"}
         >
-          Active
+          Aktywne
         </button>
+
         <button
+          type="button"
+          className="btn btn-sm btn-outline-secondary"
           onClick={() => setStatusFilter("all")}
           disabled={statusFilter === "all"}
-          style={{ marginLeft: 8 }}
         >
-          All
+          Wszystkie
         </button>
       </div>
 
       <table className="table table-bordered table-sm">
         <thead>
           <tr>
-            <th>Booking#</th>
-            <th>Date</th>
-            <th>Room</th>
-            <th>Guest</th>
-            <th>Period</th>
-            <th>Total</th>
+            <th>Nr rezerwacji</th>
+            <th>Data utworzenia</th>
+            <th>Pokój</th>
+            <th>Gość</th>
+            <th>Termin</th>
+            <th>Suma</th>
             <th>Status</th>
-            <th>Actions</th>
+            <th>Akcje</th>
           </tr>
         </thead>
 
@@ -147,9 +151,7 @@ export default function AdminPage() {
           {visibleBookings.map((b) => (
             <tr key={b.bookingId}>
               <td>{b.bookingNumber ?? "—"}</td>
-              <td>
-                {b.createdAt ? new Date(b.createdAt).toLocaleString() : "—"}
-              </td>
+              <td>{b.createdAt ? new Date(b.createdAt).toLocaleString("pl-PL") : "—"}</td>
               <td>{b.roomTitle ?? "—"}</td>
               <td>
                 {b.guestName ?? "—"}
@@ -160,22 +162,24 @@ export default function AdminPage() {
                 {b.checkIn ?? "—"} → {b.checkOut ?? "—"}
               </td>
               <td>{b.totalPrice ?? "—"} PLN</td>
-              <td>{b.status}</td>
+              <td>{b.status ?? "—"}</td>
               <td>
                 {b.status === "confirmed" ? (
                   <div className="d-flex gap-2">
                     <button
+                      type="button"
                       className="btn btn-sm btn-outline-success"
                       onClick={() => completeBooking(b.bookingId)}
                     >
-                      Complete
+                      Zakończ
                     </button>
 
                     <button
+                      type="button"
                       className="btn btn-sm btn-outline-danger"
                       onClick={() => cancelBooking(b.bookingId)}
                     >
-                      Cancel
+                      Anuluj
                     </button>
                   </div>
                 ) : (
@@ -186,6 +190,10 @@ export default function AdminPage() {
           ))}
         </tbody>
       </table>
+
+      {visibleBookings.length === 0 && (
+        <div className="alert alert-info">Brak rezerwacji do wyświetlenia.</div>
+      )}
     </div>
   );
 }
