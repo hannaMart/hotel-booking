@@ -5,7 +5,8 @@ export default function Header() {
     <nav className="navbar navbar-expand navbar-light bg-light">
       <div className="container">
         <Link className="navbar-brand" to="/">
-          Hotel
+          <img class="logo" src="../../public/favicon.png" alt="Baltic Breeze Hotel" className="logo" />
+          Baltic Breeze Hotel
         </Link>
 
         <div className="navbar-nav">

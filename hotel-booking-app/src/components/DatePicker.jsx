@@ -13,7 +13,11 @@ export default function DatePicker({
 
   // Ограничения по датам: сегодня .. +6 месяцев
   const today = new Date();
-  const minDate = new Date(today.getFullYear(), today.getMonth(), today.getDate()); // обрезали время
+  const minDate = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate()
+  ); // обрезали время
   const maxDate = new Date(minDate);
   maxDate.setMonth(maxDate.getMonth() + 6);
 
@@ -21,11 +25,9 @@ export default function DatePicker({
   const checkOutMinDate = checkIn && checkIn > minDate ? checkIn : minDate;
 
   return (
-    <div className="card mt-4">
+    <div className="form-wrapper card mt-4">
       <div className="card-body">
-        <h5 className="card-title">Select dates</h5>
-
-        <div className="row g-3">
+        <div className="flex-container-select-block row g-3">
           {/* Check-in */}
           <div className="col-md-4">
             <ReactDatePicker
@@ -54,8 +56,10 @@ export default function DatePicker({
           </div>
 
           {/* Guests */}
-          <div className="col-md-2">
+          <div className="guests-select col-md-2">
             <select
+              id="guests"
+              name="guests"
               className="form-select"
               value={guests ?? ""}
               onChange={(e) =>
@@ -74,17 +78,6 @@ export default function DatePicker({
                 </option>
               ))}
             </select>
-          </div>
-
-          {/* Button (если ты её оставляешь) */}
-          <div className="col-md-2 d-flex align-items-end">
-            <button
-              className="btn btn-primary w-100"
-              disabled={!checkIn || !checkOut || !guests || isInvalidRange}
-              onClick={() => console.log("Search clicked")}
-            >
-              Search
-            </button>
           </div>
         </div>
 

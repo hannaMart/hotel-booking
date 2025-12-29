@@ -99,7 +99,7 @@ export default function AdminPage() {
   if (error) return <p>{error}</p>;
 
   return (
-    <div className="container mt-4">
+    <div className=" main container mt-4">
       <a
         href="/admin/calendar"
         style={{ display: "inline-block", marginBottom: 12 }}

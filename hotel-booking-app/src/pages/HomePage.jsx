@@ -80,25 +80,23 @@ export default function HomePage() {
   );
 
   return (
-    <div className="container mt-4">
-      <h2>Make your choices</h2>
-      <p className="text-muted">
-        Select your check-in and check-out dates to see available rooms.
-      </p>
+    <div className=" main container mt-4">
+      <section className="content">
+        <h2>Your seaside escape starts here</h2>
+        <DatePicker
+          checkIn={checkIn}
+          checkOut={checkOut}
+          onChange={handleDatesChange}
+          guests={guests}
+          onGuestsChange={setGuests}
+        />
 
-      <DatePicker
-        checkIn={checkIn}
-        checkOut={checkOut}
-        onChange={handleDatesChange}
-        guests={guests}
-        onGuestsChange={setGuests}
-      />
-
-      {/* Отображение выбранных дат */}
-      <div className="mt-3 text-muted">
-        Selected dates: {checkIn ? checkIn.toLocaleDateString("en-GB") : "—"} →{" "}
-        {checkOut ? checkOut.toLocaleDateString("en-GB") : "—"}
-      </div>
+        {/* Отображение выбранных дат */}
+        <div className="mt-3">
+          Selected dates: {checkIn ? checkIn.toLocaleDateString("en-GB") : "—"}{" "}
+          → {checkOut ? checkOut.toLocaleDateString("en-GB") : "—"}
+        </div>
+      </section>
 
       {/* Условный рендер */}
       {/* Условный рендер */}

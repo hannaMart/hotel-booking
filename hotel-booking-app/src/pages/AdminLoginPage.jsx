@@ -36,7 +36,7 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="container" style={{ maxWidth: 420 }}>
+    <div className=" main container" style={{ maxWidth: 420 }}>
       <h2 className="mb-3">Admin login</h2>
 
       <form onSubmit={onSubmit} className="card p-3">

@@ -86,7 +86,7 @@ export default function BookingPage() {
   };
 
   return (
-    <div className="container py-4">
+    <div className=" booking-page container py-4">
       <h2 className="mb-3">Confirm your booking</h2>
       {error && <div className="alert alert-danger">{error}</div>}
 

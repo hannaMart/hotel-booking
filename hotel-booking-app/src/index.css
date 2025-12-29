@@ -64,7 +64,7 @@ button:focus-visible {
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  background: #fff;
+  background: #00000050;
 }
 
 .spinner {
@@ -142,3 +142,70 @@ button:focus-visible {
   margin-top: 24px;
   color: #777;
 }
+
+.logo {
+  max-width: 70px;
+  display: inline-block;
+  margin-right: 20px;
+}
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+}
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background-image: url("https://oboi247.ru/img/post/27/0.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  font-size: 15px;
+}
+
+.content {
+  padding: 20px;
+  border-radius: 10px;
+  background: #00000030;
+  border: 2px solid white;
+  color: white !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.form-wrapper {
+  max-width: 550px;
+  padding: 20px !important;
+}
+
+.guests-select {
+  width: auto !important;
+}
+.flex-container-select-block {
+  justify-content: space-between;
+}
+.main {
+  min-height: calc(100vh - 72px); /* высота header */
+  display: flex;
+  align-items: center;      /* вертикально */
+  justify-content: center;  /* горизонтально */
+  padding: 24px 16px;
+  flex-direction: column;
+}
+.booking-page {
+  h2{
+    color: white;
+    text-align: center;
+  }
+  img{
+    height: auto!important;
+  }
+
+}
+
