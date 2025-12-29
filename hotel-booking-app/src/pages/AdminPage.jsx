@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_URL } from "../config";
 
 export default function AdminPage() {
   const [bookings, setBookings] = useState([]);
@@ -15,7 +16,7 @@ export default function AdminPage() {
     setError(null);
 
     try {
-      const meRes = await fetch("http://localhost:4000/admin/me", {
+      const meRes = await fetch(`${API_URL}/admin/me`, {
         credentials: "include",
       });
       const me = await meRes.json();
@@ -25,7 +26,7 @@ export default function AdminPage() {
         return;
       }
 
-      const res = await fetch("http://localhost:4000/admin/bookings", {
+      const res = await fetch(`${API_URL}/admin/bookings`, {
         credentials: "include",
       });
       const data = await res.json();
@@ -45,15 +46,17 @@ export default function AdminPage() {
 
   useEffect(() => {
     loadBookings();
+    document.getElementById("root")?.classList.add("no-bg");
+    return () => document.getElementById("root")?.classList.remove("no-bg");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // отмена бронирования — обновляем только строку
   async function cancelBooking(bookingId) {
-    const res = await fetch(
-      `http://localhost:4000/admin/bookings/${bookingId}/cancel`,
-      { method: "PATCH", credentials: "include" }
-    );
+    const res = await fetch(`${API_URL}/admin/bookings/${bookingId}/cancel`, {
+      method: "PATCH",
+      credentials: "include",
+    });
 
     const updated = await res.json();
 
@@ -70,10 +73,10 @@ export default function AdminPage() {
   }
 
   async function completeBooking(bookingId) {
-    const res = await fetch(
-      `http://localhost:4000/admin/bookings/${bookingId}/complete`,
-      { method: "PATCH", credentials: "include" }
-    );
+    const res = await fetch(`${API_URL}/admin/bookings/${bookingId}/complete`, {
+      method: "PATCH",
+      credentials: "include",
+    });
 
     const updated = await res.json();
 
@@ -99,7 +102,7 @@ export default function AdminPage() {
   if (error) return <p>{error}</p>;
 
   return (
-    <div className=" main container mt-4">
+    <div className="main container mt-4">
       <a
         href="/admin/calendar"
         style={{ display: "inline-block", marginBottom: 12 }}

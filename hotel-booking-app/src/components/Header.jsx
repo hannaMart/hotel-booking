@@ -9,7 +9,7 @@ export default function Header() {
           Baltic Breeze Hotel
         </Link>
 
-        <div className="navbar-nav">
+        {/* <div className="navbar-nav">
           <Link className="nav-link" to="/">
             Home
           </Link>
@@ -17,7 +17,7 @@ export default function Header() {
           <Link className="nav-link" to="/admin">
             Admin
           </Link>
-        </div>
+        </div> */}
       </div>
     </nav>
   );

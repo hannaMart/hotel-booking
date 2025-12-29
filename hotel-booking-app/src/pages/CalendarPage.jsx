@@ -4,11 +4,9 @@ import { useNavigate } from "react-router-dom";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
-
+import { API_URL } from "../config";
 import { toYMD } from "../utils/dateYMD";
 import { calculateNights } from "../utils/dateUtils";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
 export default function CalendarPage() {
   const navigate = useNavigate();
@@ -25,6 +23,8 @@ export default function CalendarPage() {
   useEffect(() => {
     loadRooms();
     loadBookings();
+    document.getElementById("root")?.classList.add("no-bg");
+    return () => document.getElementById("root")?.classList.remove("no-bg");
   }, []);
 
   async function loadRooms() {
@@ -128,7 +128,7 @@ export default function CalendarPage() {
   /* -------------------- RENDER -------------------- */
 
   return (
-    <div className="calendar-page">
+    <div className="no-bg calendar-page">
       <h1 className="calendar-title">Availability calendar</h1>
 
       <div className="availability-legend">
@@ -193,7 +193,7 @@ export default function CalendarPage() {
         headerToolbar={{
           left: "prev,next today",
           center: "title",
-          right: "dayGridMonth,dayGridWeek,dayGridDay",
+          right: "dayGridMonth,dayGridWeek",
         }}
         // Подсветка по Guests: проверяем доступность на 1 ночь (этот день)
         dayCellClassNames={(arg) => {

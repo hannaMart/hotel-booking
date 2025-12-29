@@ -6,12 +6,14 @@ import AdminLoginPage from "./pages/AdminLoginPage";
 import Header from "./components/Header";
 import BookingPage from "./pages/BookingPage";
 import ConfirmationPage from "./pages/ConfirmationPage";
+import ScrollToTop from "./components/ScrollToTop";
 
 import "./App.css";
 
 function App() {
   return (
     <BrowserRouter>
+    <ScrollToTop />
       <Header />
       <Routes>
         <Route path="/" element={<HomePage />} />

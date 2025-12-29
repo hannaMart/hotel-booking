@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useMemo, useState } from "react";
 import { toYMD } from "../utils/dateYMD";
+import { API_URL } from "../config";
 
 export default function BookingPage() {
   const { state } = useLocation();
@@ -49,7 +50,7 @@ export default function BookingPage() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:4000/bookings", {
+      const res = await fetch(`${API_URL}/bookings`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

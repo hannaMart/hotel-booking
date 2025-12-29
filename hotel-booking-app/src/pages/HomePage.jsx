@@ -3,6 +3,7 @@ import DatePicker from "../components/DatePicker";
 import RoomsList from "../components/RoomsList";
 import { calculateNights } from "../utils/dateUtils";
 import { toYMD } from "../utils/dateYMD";
+import { API_URL } from "../config";
 
 export default function HomePage() {
   const [checkIn, setCheckIn] = useState(null);
@@ -28,7 +29,7 @@ export default function HomePage() {
     setRoomsLoading(true);
 
     fetch(
-      `http://localhost:4000/available-rooms?checkIn=${ci}&checkOut=${co}&guests=${guests}`
+      `${API_URL}/available-rooms?checkIn=${ci}&checkOut=${co}&guests=${guests}`
     )
       .then((res) => res.json())
       .then(async (data) => {
@@ -80,7 +81,7 @@ export default function HomePage() {
   );
 
   return (
-    <div className=" main container mt-4">
+    <div className=" main">
       <section className="content">
         <h2>Your seaside escape starts here</h2>
         <DatePicker

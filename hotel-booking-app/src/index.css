@@ -161,12 +161,22 @@ body {
 
 body {
   margin: 0;
+  font-size: 15px;
+}
+
+/* фон по умолчанию (на всём приложении) */
+#root {
+  min-height: 100vh;
   background-image: url("https://oboi247.ru/img/post/27/0.jpg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
-  font-size: 15px;
+}
+
+/* админка отключает фон */
+#root.no-bg {
+  background: #f5f7f8;
 }
 
 .content {
@@ -193,19 +203,17 @@ body {
 .main {
   min-height: calc(100vh - 72px); /* высота header */
   display: flex;
-  align-items: center;      /* вертикально */
-  justify-content: center;  /* горизонтально */
+  align-items: center; /* вертикально */
+  justify-content: center; /* горизонтально */
   padding: 24px 16px;
   flex-direction: column;
 }
 .booking-page {
-  h2{
+  h2 {
     color: white;
     text-align: center;
   }
-  img{
-    height: auto!important;
+  img {
+    height: auto !important;
   }
-
 }
-

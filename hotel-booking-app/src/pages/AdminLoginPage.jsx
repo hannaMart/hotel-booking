@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+import { API_URL } from "../config";
 
 export default function AdminLoginPage() {
   const [password, setPassword] = useState("");
@@ -36,7 +35,7 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className=" main container" style={{ maxWidth: 420 }}>
+    <div className="main container" style={{ maxWidth: 420 }}>
       <h2 className="mb-3">Admin login</h2>
 
       <form onSubmit={onSubmit} className="card p-3">

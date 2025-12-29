@@ -1,5 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
+import { API_URL } from "../config";
 
 export default function ConfirmationPage() {
   const navigate = useNavigate();
@@ -14,7 +15,7 @@ export default function ConfirmationPage() {
     let isPageActive = true; // true — пока страница открыта и можно обновлять state
     setLoading(true);
 
-    fetch(`http://localhost:4000/bookings/${bookingIdParam}`)
+    fetch(`${API_URL}/bookings/${bookingIdParam}`)
       .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then((data) => {
         if (isPageActive) setServerBooking(data);
