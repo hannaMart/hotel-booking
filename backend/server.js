@@ -7,26 +7,28 @@ const { sendBookingConfirmationEmail } = require("./mailer");
 
 const app = express();
 
-const allowedOrigins = ["http://localhost:5173", "http://localhost:5174"];
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "https://hotel-booking-delta-woad.vercel.app",
+];
 
 app.use(
   cors({
     origin: (origin, cb) => {
-      // Zapytania bez origin (np. Render healthcheck, curl) – pozwalamy
+      // запросы без origin (Render, curl, Postman)
       if (!origin) return cb(null, true);
 
-      // Lokalny frontend (Vite)
-      if (allowedOrigins.includes(origin)) return cb(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return cb(null, true);
+      }
 
-      // Tymczasowo: pozwalamy na domeny https (np. Vercel)
-      if (origin.startsWith("https://")) return cb(null, true);
-
-      // Inne źródła blokujemy
       return cb(new Error("Not allowed by CORS"));
     },
     credentials: true,
   })
 );
+
 
 app.use(express.json());
 
