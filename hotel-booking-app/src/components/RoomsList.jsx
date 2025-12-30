@@ -12,7 +12,7 @@ export default function RoomsList({ rooms, nights, checkIn, checkOut, guests }) 
 
       <div className="row g-3">
         {rooms.map((room) => (
-          <div className={`col-12 col-md-6 ${rooms.length === 1 ? "col-lg-10 mx-auto" : "col-lg-4"}`} key={room.id}>
+          <div className={`col-12 col-md-6 ${rooms.length === 1 ? "col-lg-10 " : "col-lg-4"}`} key={room.id}>
             <RoomCard
               room={room}
               nights={nights}
