@@ -217,18 +217,6 @@ button:focus-visible {
 .booking-page img {
   height: auto !important;
 }
-.main { 
-  align-items: stretch; 
-}
-
-.content,
-.roomsSection,
-.mt-4 {
-  width: 100%;
-  max-width: 1200px;
-  margin-left: auto;
-  margin-right: auto;
-}
 
 
 
