@@ -20,40 +20,35 @@ export default function RoomCard({ room, nights, checkIn, checkOut, guests }) {
   };
 
   return (
-    <div className="card h-100">
-      <img
-        src={room.imageUrl}
-        className="card-img-top"
-        alt={room.title}
-        style={{ height: 200, objectFit: "cover" }}
-      />
+    <div className="roomCard">
+      <div className="roomCard__imgWrap">
+        <img src={room.imageUrl} alt={room.title} />
+      </div>
 
-      <div className="card-body d-flex flex-column">
-        <h5 className="card-title mb-2">{room.title}</h5>
+      <div className="roomCard__body">
+        <h3 className="roomCard__title">{room.title}</h3>
+        <div className="roomCard__meta">{room.bedType}</div>
 
-        <div className="text-muted small mb-2">{room.bedType}</div>
-
-        <ul className="small mb-3">
+        <ul className="roomCard__features">
           {room.features.map((feature) => (
             <li key={feature}>{feature}</li>
           ))}
         </ul>
 
-        <div className="mt-auto">
-          <div className="fw-bold">
-            {pricePerNight} PLN{" "}
-            <span className="text-muted small">/ noc</span>
+        <div className="roomCard__footer">
+          <div className="roomCard__price">
+            <strong>{pricePerNight} PLN</strong> <span>/ noc</span>
           </div>
 
           {nights > 0 && (
-            <div className="text-muted small mb-2">
+            <div className="roomCard__total">
               {totalPrice} PLN łącznie za {nights}{" "}
               {nights === 1 ? "noc" : "nocy"}
             </div>
           )}
 
           <button
-            className="btn btn-primary w-100"
+            className="roomCard__btn"
             type="button"
             onClick={handleBookNow}
             disabled={!checkIn || !checkOut || !guests || nights <= 0}
