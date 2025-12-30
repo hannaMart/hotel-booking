@@ -25,7 +25,7 @@ export default function RoomCard({ room, nights, checkIn, checkOut, guests }) {
         src={room.imageUrl}
         className="card-img-top"
         alt={room.title}
-        style={{ height: 200, objectFit: "cover" }}
+        style={{ height: 240, objectFit: "cover" }}
       />
 
       <div className="card-body d-flex flex-column">

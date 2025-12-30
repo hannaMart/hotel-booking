@@ -218,5 +218,9 @@ button:focus-visible {
   height: auto !important;
 }
 
+.card {
+  min-width: 350px;
+}
+
 
 
