@@ -5,12 +5,19 @@ const session = require("express-session");
 const supabase = require("./supabaseClient");
 const { sendBookingConfirmationEmail } = require("./mailer");
 
+const webpush = require("web-push");
+webpush.setVapidDetails(
+  "mailto:test@example.com",
+  process.env.VAPID_PUBLIC_KEY,
+  process.env.VAPID_PRIVATE_KEY,
+);
+
 const app = express();
 
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
-   "http://localhost:4173",
+  "http://localhost:4173",
   "https://hotel-booking-delta-woad.vercel.app",
 ];
 
@@ -27,13 +34,18 @@ app.use(
       return cb(new Error("Not allowed by CORS"));
     },
     credentials: true,
-  })
+  }),
 );
-
 
 app.use(express.json());
 
 app.get("/health", (req, res) => res.json({ ok: true }));
+
+app.get("/push/public-key", (req, res) => {
+  res.json({
+    publicKey: process.env.VAPID_PUBLIC_KEY,
+  });
+});
 
 console.log("SESSION_SECRET:", !!process.env.SESSION_SECRET);
 console.log("ADMIN_PASSWORD:", !!process.env.ADMIN_PASSWORD);
@@ -54,7 +66,7 @@ app.use(
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 1000 * 60 * 60 * 3, // 3 hours
     },
-  })
+  }),
 );
 
 // ---------- Admin auth helpers ----------
@@ -148,7 +160,9 @@ app.get("/available-rooms", async (req, res) => {
   const { checkIn, checkOut, guests } = req.query;
 
   if (!checkIn || !checkOut || !guests) {
-    return res.status(400).json({ message: "Missing required query parameters" });
+    return res
+      .status(400)
+      .json({ message: "Missing required query parameters" });
   }
 
   try {
@@ -169,7 +183,9 @@ app.get("/available-rooms", async (req, res) => {
     if (bookingsError) throw bookingsError;
 
     const bookedRoomIds = bookings.map((b) => b.room_id);
-    const availableRooms = rooms.filter((room) => !bookedRoomIds.includes(room.id));
+    const availableRooms = rooms.filter(
+      (room) => !bookedRoomIds.includes(room.id),
+    );
 
     return res.json(formatData(availableRooms));
   } catch (error) {
@@ -216,7 +232,8 @@ app.post("/bookings", async (req, res) => {
     if (!room) return res.status(404).json({ message: "Room not found" });
 
     // 3) price
-    const nights = (new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24);
+    const nights =
+      (new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24);
     const totalPrice = nights * room.price_per_night;
 
     // 4) insert payload
@@ -296,7 +313,11 @@ app.post("/bookings", async (req, res) => {
 app.get("/bookings/:id", async (req, res) => {
   const { id } = req.params;
 
-  const { data, error } = await supabase.from("bookings").select("*").eq("id", id).single();
+  const { data, error } = await supabase
+    .from("bookings")
+    .select("*")
+    .eq("id", id)
+    .single();
 
   if (error || !data) {
     return res.status(404).json({ message: "Booking not found" });
@@ -327,7 +348,7 @@ app.get("/admin/bookings", requireAdmin, async (req, res) => {
       total_price,
       email_sent,
       email_sent_at
-    `
+    `,
     )
     .order("created_at", { ascending: false })
     .limit(50);

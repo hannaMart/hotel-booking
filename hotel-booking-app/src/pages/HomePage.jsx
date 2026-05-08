@@ -4,6 +4,8 @@ import RoomsList from "../components/RoomsList";
 import { calculateNights } from "../utils/dateUtils";
 import { toYMD } from "../utils/dateYMD";
 import { API_URL } from "../config";
+import { askNotificationPermission } from "../utils/askNotificationPermission";
+import { subscribeToPush } from "../utils/src/utils/subscribeToPush";
 
 export default function HomePage() {
   const [checkIn, setCheckIn] = useState(null);
@@ -43,7 +45,7 @@ export default function HomePage() {
         setRoomsLoading(true);
 
         const res = await fetch(
-          `${API_URL}/available-rooms?checkIn=${ci}&checkOut=${co}&guests=${guests}`
+          `${API_URL}/available-rooms?checkIn=${ci}&checkOut=${co}&guests=${guests}`,
         );
 
         if (!res.ok) {
@@ -74,7 +76,10 @@ export default function HomePage() {
     };
   }, [checkIn, checkOut, guests]);
 
-  const handleDatesChange = ({ checkIn: nextCheckIn, checkOut: nextCheckOut }) => {
+  const handleDatesChange = ({
+    checkIn: nextCheckIn,
+    checkOut: nextCheckOut,
+  }) => {
     setCheckIn(nextCheckIn);
 
     if (
@@ -94,6 +99,23 @@ export default function HomePage() {
 
   return (
     <div className="main">
+      <button
+        style={{
+          position: "fixed",
+          top: "20px",
+          right: "20px",
+          zIndex: 9999,
+          background: "red",
+          color: "white",
+          padding: "12px",
+        }}
+        onClick={async () => {
+          await askNotificationPermission();
+          await subscribeToPush();
+        }}
+      >
+        Enable notifications
+      </button>
       <section className="content">
         <h2>Twój nadmorski wypoczynek zaczyna się tutaj</h2>
 
@@ -106,15 +128,15 @@ export default function HomePage() {
         />
 
         <div className="mt-3">
-          Wybrane daty:{" "}
-          {checkIn ? checkIn.toLocaleDateString("pl-PL") : "—"} →{" "}
+          Wybrane daty: {checkIn ? checkIn.toLocaleDateString("pl-PL") : "—"} →{" "}
           {checkOut ? checkOut.toLocaleDateString("pl-PL") : "—"}
         </div>
       </section>
 
       {!checkIn || !checkOut ? (
         <div className="alert alert-info mt-4 mb-0">
-          Wybierz daty <b>zameldowania</b> i <b>wymeldowania</b>, aby zobaczyć dostępne pokoje.
+          Wybierz daty <b>zameldowania</b> i <b>wymeldowania</b>, aby zobaczyć
+          dostępne pokoje.
         </div>
       ) : !guests ? (
         <div className="alert alert-info mt-4 mb-0">
