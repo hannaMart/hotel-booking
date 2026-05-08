@@ -14,6 +14,8 @@ webpush.setVapidDetails(
 
 const app = express();
 
+let pushSubscriptions = [];
+
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
@@ -47,9 +49,35 @@ app.get("/push/public-key", (req, res) => {
   });
 });
 app.post("/push/save-subscription", (req, res) => {
-  console.log(req.body);
+  const subscription = req.body;
+
+  pushSubscriptions.push(subscription);
+
+  console.log("Saved push subscription:", subscription.endpoint);
 
   return res.json({ ok: true });
+});
+
+app.post("/push/test", async (req, res) => {
+  try {
+    for (const subscription of pushSubscriptions) {
+      await webpush.sendNotification(
+        subscription,
+        JSON.stringify({
+          title: "Baltic Breeze",
+          body: "Test push notification works!",
+        }),
+      );
+    }
+
+    return res.json({ ok: true });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      error: "Push failed",
+    });
+  }
 });
 
 console.log("SESSION_SECRET:", !!process.env.SESSION_SECRET);

@@ -3,9 +3,7 @@ import { API_URL } from "../../../config";
 function urlBase64ToUint8Array(base64String) {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
 
-  const base64 = (base64String + padding)
-    .replace(/-/g, "+")
-    .replace(/_/g, "/");
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
 
   const rawData = window.atob(base64);
 
@@ -25,4 +23,11 @@ export async function subscribeToPush() {
   });
 
   console.log(subscription);
+  await fetch(`${API_URL}/push/save-subscription`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(subscription),
+  });
 }
