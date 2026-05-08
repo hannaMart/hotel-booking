@@ -14,7 +14,7 @@ export default defineConfig({
         name: "Baltic Breeze",
         short_name: "BBH",
         description: "Hotel booking application for Baltic Breeze",
-        theme_color: "#0d6efd",
+        theme_color: "#173a70ff",
         background_color: "#ffffff",
         display: "standalone",
         start_url: "/",

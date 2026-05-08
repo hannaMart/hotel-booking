@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import logo from "../assets/images/logo.png";
+import InstallPWAButton from "./InstallPWAButton";
 
 export default function Header() {
   return (
@@ -9,6 +10,7 @@ export default function Header() {
           <img className="logo" src={logo} alt="Baltic Breeze Hotel" />
           Baltic Breeze Hotel
         </Link>
+        <InstallPWAButton/>
 
         {/* <div className="navbar-nav">
           <Link className="nav-link" to="/">
