@@ -46,6 +46,11 @@ app.get("/push/public-key", (req, res) => {
     publicKey: process.env.VAPID_PUBLIC_KEY,
   });
 });
+app.post("/push/save-subscription", (req, res) => {
+  console.log(req.body);
+
+  return res.json({ ok: true });
+});
 
 console.log("SESSION_SECRET:", !!process.env.SESSION_SECRET);
 console.log("ADMIN_PASSWORD:", !!process.env.ADMIN_PASSWORD);
