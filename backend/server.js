@@ -42,11 +42,20 @@ app.use(
 app.use(express.json());
 
 async function sendPushToGuest(title, body) {
-  for (const subscription of pushSubscriptions) {
+  const { data, error } = await supabase
+    .from("push_subscriptions")
+    .select("subscription");
+
+  if (error) {
+    console.error("PUSH SUBSCRIPTIONS LOAD ERROR:", error.message);
+    return;
+  }
+
+  for (const item of data) {
     try {
       await webpush.sendNotification(
-        subscription,
-        JSON.stringify({ title, body }),
+        item.subscription,
+        JSON.stringify({ title, body })
       );
     } catch (error) {
       console.error("PUSH ERROR:", error?.message || error);
