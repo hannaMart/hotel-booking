@@ -61,14 +61,29 @@ app.get("/push/public-key", (req, res) => {
     publicKey: process.env.VAPID_PUBLIC_KEY,
   });
 });
-app.post("/push/save-subscription", (req, res) => {
-  const subscription = req.body;
+app.post("/push/save-subscription", async (req, res) => {
+  try {
+    const subscription = req.body;
 
-  pushSubscriptions = [subscription];
+    const { error } = await supabase
+      .from("push_subscriptions")
+      .upsert({
+        endpoint: subscription.endpoint,
+        subscription,
+      });
 
-  console.log("Saved push subscription:", subscription.endpoint);
+    if (error) throw error;
 
-  return res.json({ ok: true });
+    console.log("Saved push subscription:", subscription.endpoint);
+
+    return res.json({ ok: true });
+  } catch (error) {
+    console.error("SAVE SUBSCRIPTION ERROR:", error?.message || error);
+
+    return res.status(500).json({
+      error: "Failed to save subscription",
+    });
+  }
 });
 
 app.post("/push/test", async (req, res) => {
