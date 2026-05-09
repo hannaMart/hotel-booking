@@ -5,7 +5,7 @@ import InstallPWAButton from "./InstallPWAButton";
 
 export default function Header() {
   return (
-    <nav className="navbar navbar-expand">
+    <nav className="navbar navbar-expand" style="background: black;">
       <div className="container">
         <Link className="navbar-brand" to="/">
           <img className="logo" src={logo} alt="Baltic Breeze Hotel" />
