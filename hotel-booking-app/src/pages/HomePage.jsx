@@ -99,23 +99,6 @@ export default function HomePage() {
 
   return (
     <div className="main">
-      <button
-        style={{
-          position: "fixed",
-          top: "20px",
-          right: "20px",
-          zIndex: 9999,
-          background: "red",
-          color: "white",
-          padding: "12px",
-        }}
-        onClick={async () => {
-          await askNotificationPermission();
-          await subscribeToPush();
-        }}
-      >
-        Enable notifications
-      </button>
       <section className="content">
         <h2>Twój nadmorski wypoczynek zaczyna się tutaj</h2>
 
