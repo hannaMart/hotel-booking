@@ -98,7 +98,7 @@ export default function HomePage() {
     checkIn && checkOut && checkOut.getTime() <= checkIn.getTime();
 
   return (
-    <div className="main" style={{background: "black", color: "white" }}>
+    <div className="main">
       <section className="content">
         <h2>Twój nadmorski wypoczynek zaczyna się tutaj</h2>
 
