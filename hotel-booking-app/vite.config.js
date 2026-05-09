@@ -12,9 +12,14 @@ export default defineConfig({
       srcDir: "src",
       filename: "sw.js",
       strategies: "injectManifest",
-      
+
       devOptions: {
         enabled: true,
+      },
+
+      workbox: {
+        cleanupOutdatedCaches: true,
+        navigateFallback: "/index.html",
       },
       manifest: {
         name: "Baltic Breeze",
