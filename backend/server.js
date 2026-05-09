@@ -41,6 +41,19 @@ app.use(
 
 app.use(express.json());
 
+async function sendPushToGuest(title, body) {
+  for (const subscription of pushSubscriptions) {
+    try {
+      await webpush.sendNotification(
+        subscription,
+        JSON.stringify({ title, body }),
+      );
+    } catch (error) {
+      console.error("PUSH ERROR:", error?.message || error);
+    }
+  }
+}
+
 app.get("/health", (req, res) => res.json({ ok: true }));
 
 app.get("/push/public-key", (req, res) => {
@@ -51,7 +64,7 @@ app.get("/push/public-key", (req, res) => {
 app.post("/push/save-subscription", (req, res) => {
   const subscription = req.body;
 
-  pushSubscriptions.push(subscription);
+  pushSubscriptions = [subscription];
 
   console.log("Saved push subscription:", subscription.endpoint);
 
@@ -334,7 +347,13 @@ app.post("/bookings", async (req, res) => {
         });
     }
 
-    // 6) respond
+    // 6) push notification
+    await sendPushToGuest(
+      "Booking confirmed",
+      `Your booking #${data.booking_number} was created successfully.`,
+    );
+
+    // 7) respond
     return res.status(201).json(mapBookingRowToDto(data));
   } catch (e) {
     console.error("BOOKING ERROR:", e?.message || e);
