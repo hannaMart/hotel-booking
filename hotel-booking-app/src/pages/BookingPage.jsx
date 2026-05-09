@@ -4,6 +4,7 @@ import { toYMD } from "../utils/dateYMD";
 import { API_URL } from "../config";
 import { subscribeToPush } from "../utils/src/utils/subscribeToPush";
 import { askNotificationPermission } from "../utils/askNotificationPermission";
+https://hotel-booking-delta-woad.vercel.app/confirmation/8107e900-594a-475a-85e9-03536bbe8f0d
 
 
 export default function BookingPage() {
