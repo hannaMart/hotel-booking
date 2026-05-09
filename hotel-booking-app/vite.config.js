@@ -7,15 +7,15 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "autoUpdate",
-      injectRegister: "auto",
+      injectRegister: false,
 
       srcDir: "src",
       filename: "sw.js",
       strategies: "injectManifest",
 
-      devOptions: {
-        enabled: true,
-      },
+      // devOptions: {
+      //   enabled: true,
+      // },
 
       workbox: {
         cleanupOutdatedCaches: true,
