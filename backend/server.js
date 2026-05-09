@@ -55,7 +55,7 @@ async function sendPushToGuest(title, body) {
     try {
       await webpush.sendNotification(
         item.subscription,
-        JSON.stringify({ title, body })
+        JSON.stringify({ title, body }),
       );
     } catch (error) {
       console.error("PUSH ERROR:", error?.message || error);
@@ -74,12 +74,13 @@ app.post("/push/save-subscription", async (req, res) => {
   try {
     const subscription = req.body;
 
-    const { error } = await supabase
-      .from("push_subscriptions")
-      .upsert({
+    const { error } = await supabase.from("push_subscriptions").upsert(
+      {
         endpoint: subscription.endpoint,
         subscription,
-      });
+      },
+      { onConflict: "endpoint" },
+    );
 
     if (error) throw error;
 
