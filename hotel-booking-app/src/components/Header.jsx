@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import logo from "../assets/images/logo.png";
 import InstallPWAButton from "./InstallPWAButton";
-import EnableNotificationsButton from "./EnableNotificationsButton";
+// import EnableNotificationsButton from "./EnableNotificationsButton";
 
 export default function Header() {
   return (
@@ -12,7 +12,7 @@ export default function Header() {
           Baltic Breeze Hotel
         </Link>
         <InstallPWAButton/>
-        <EnableNotificationsButton/>
+        {/* <EnableNotificationsButton/> */}
 
         {/* <div className="navbar-nav">
           <Link className="nav-link" to="/">

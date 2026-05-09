@@ -2,6 +2,9 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useMemo, useState } from "react";
 import { toYMD } from "../utils/dateYMD";
 import { API_URL } from "../config";
+import { subscribeToPush } from "../utils/src/utils/subscribeToPush";
+import { askNotificationPermission } from "../utils/askNotificationPermission";
+
 
 export default function BookingPage() {
   const { state } = useLocation();
@@ -17,7 +20,8 @@ export default function BookingPage() {
     return (
       <div className="container py-4">
         <div className="alert alert-warning">
-          Brakuje danych rezerwacji. Wróć na stronę główną i wybierz termin oraz pokój.
+          Brakuje danych rezerwacji. Wróć na stronę główną i wybierz termin oraz
+          pokój.
         </div>
         <button className="btn btn-primary" onClick={() => navigate("/")}>
           Wróć na stronę główną
@@ -51,6 +55,10 @@ export default function BookingPage() {
     setLoading(true);
 
     try {
+      if (Notification.permission !== "granted") {
+        await askNotificationPermission();
+        await subscribeToPush();
+      }
       const res = await fetch(`${API_URL}/bookings`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
