@@ -8,11 +8,7 @@ import { registerSW } from "virtual:pwa-register";
 
 registerSW({
   immediate: true,
-  onRegisterSW(swURL, registration){
-    if (registration){
-      registration.update();
-    }
-  }
+ 
 })
 
 createRoot(document.getElementById('root')).render(
